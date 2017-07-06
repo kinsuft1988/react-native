@@ -10,6 +10,7 @@
 #import "RCTWebView.h"
 
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
 #import "RCTAutoInsetsProtocol.h"
 #import "RCTConvert.h"
@@ -282,21 +283,22 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   if (_messagingEnabled) {
     #if RCT_DEV
     // See isNative in lodash
-    NSString *testPostMessageNative = @"String(window.postMessage) === String(Object.hasOwnProperty).replace('hasOwnProperty', 'postMessage')";
-    BOOL postMessageIsNative = [
-      [webView stringByEvaluatingJavaScriptFromString:testPostMessageNative]
-      isEqualToString:@"true"
-    ];
-    if (!postMessageIsNative) {
-      RCTLogError(@"Setting onMessage on a WebView overrides existing values of window.postMessage, but a previous value was defined");
-    }
+//    NSString *testPostMessageNative = @"String(window.postMessage) === String(Object.hasOwnProperty).replace('hasOwnProperty', 'postMessage')";
+//    BOOL postMessageIsNative = [
+//      [webView stringByEvaluatingJavaScriptFromString:testPostMessageNative]
+//      isEqualToString:@"true"
+//    ];
+//    if (!postMessageIsNative) {
+//      RCTLogError(@"Setting onMessage on a WebView overrides existing values of window.postMessage, but a previous value was defined");
+//    }
     #endif
     NSString *source = [NSString stringWithFormat:
-      @"window.originalPostMessage = window.postMessage;"
-      "window.postMessage = function(data) {"
+      @"window.originalPostMessage = window.dispatchMessage;"
+      "window.dispatchMessage = function(data) {"
         "window.location = '%@://%@?' + encodeURIComponent(String(data));"
       "};", RCTJSNavigationScheme, RCTJSPostMessageHost
     ];
+    NSLog(@"source = %@",source);
     [webView stringByEvaluatingJavaScriptFromString:source];
   }
   if (_injectedJavaScript != nil) {
