@@ -8,6 +8,7 @@
  */
 
 package com.facebook.react.views.webview;
+import android.webkit.CookieManager;
 
 import javax.annotation.Nullable;
 
@@ -281,22 +282,22 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
 
     public void linkBridge() {
       if (messagingEnabled) {
-        if (ReactBuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-          // See isNative in lodash
-          String testPostMessageNative = "String(window.postMessage) === String(Object.hasOwnProperty).replace('hasOwnProperty', 'postMessage')";
-          evaluateJavascript(testPostMessageNative, new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String value) {
-              if (value.equals("true")) {
-                FLog.w(ReactConstants.TAG, "Setting onMessage on a WebView overrides existing values of window.postMessage, but a previous value was defined");
-              }
-            }
-          });
+       if (ReactBuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+         // See isNative in lodash
+         String testPostMessageNative = "String(window.postMessage) === String(Object.hasOwnProperty).replace('hasOwnProperty', 'postMessage')";
+         evaluateJavascript(testPostMessageNative, new ValueCallback<String>() {
+           @Override
+           public void onReceiveValue(String value) {
+             if (value.equals("true")) {
+               FLog.w(ReactConstants.TAG, "Setting onMessage on a WebView overrides existing values of window.postMessage, but a previous value was defined");
+             }
+           }
+         });
         }
 
         loadUrl("javascript:(" +
-          "window.originalPostMessage = window.postMessage," +
-          "window.postMessage = function(data) {" +
+          "window.originalPostMessage = window.dispatchMessage," +
+          "window.dispatchMessage = function(data) {" +
             BRIDGE_NAME + ".postMessage(String(data));" +
           "}" +
         ")");
@@ -349,9 +350,16 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
     });
     reactContext.addLifecycleEventListener(webView);
     mWebViewConfig.configWebView(webView);
+    webView.getSettings().setJavaScriptEnabled(true);
+    webView.getSettings().setAllowFileAccess(true);
+    webView.getSettings().setAppCacheEnabled(true);
     webView.getSettings().setBuiltInZoomControls(true);
     webView.getSettings().setDisplayZoomControls(false);
     webView.getSettings().setDomStorageEnabled(true);
+
+    //hukun add for cookie setting
+    CookieManager cookieManager = CookieManager.getInstance();
+    cookieManager.setAcceptThirdPartyCookies(webView,true);
 
     // Fixes broken full-screen modals/galleries due to body height being 0.
     webView.setLayoutParams(
