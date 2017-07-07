@@ -165,7 +165,7 @@ def findNdkBuildFullPath() {
         return new File(ndkDir, getNdkBuildName()).getAbsolutePath()
     }
     def ndkDir = android.hasProperty('plugin') ? android.plugin.ndkFolder :
-            plugins.getPlugin('com.android.library').sdkHandler.getNdkFolder()
+            project.android.ndkDirectory.absolutePath //plugins.getPlugin('com.android.library').sdkHandler.getNdkFolder()
     if (ndkDir) {
         return new File(ndkDir, getNdkBuildName()).getAbsolutePath()
     }
@@ -227,7 +227,7 @@ task packageReactNdkLibsForBuck(dependsOn: packageReactNdkLibs, type: Copy) {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         minSdkVersion 16
