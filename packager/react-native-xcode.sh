@@ -10,6 +10,12 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on environment variables (including PWD) set by Xcode
 
+#accellerate the debug time
+if [ "$CONFIGURATION" = "Debug" ]; then
+  echo "--- Skip bundle building in 'Debug' mode"
+  exit 0
+fi
+
 case "$CONFIGURATION" in
   Debug)
     # Speed up build times by skipping the creation of the offline package for debug
